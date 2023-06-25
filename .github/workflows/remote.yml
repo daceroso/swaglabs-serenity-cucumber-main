@@ -1,0 +1,26 @@
+name: Remote Tests
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up JDK 17
+        uses: actions/setup-java@v1
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Cache the Maven packages to speed up build
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Remote Tests
+        run: mvn clean verify -Denvironment=run_with_saucelabs -Dsaucelabs.username=${{ secrets.SAUCELABS_USER }} -Dsaucelabs.accessKey=${{ secrets.SAUCELABS_KEY }}
